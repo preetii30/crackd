@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { login } from '../services/authService'
+import { GoogleLogin } from '@react-oauth/google'
+import { googleAuth, login } from '../services/authService'
 import GoogleButton from '../components/GoogleButton'
 import LogoBadge from '../components/LogoBadge'
 
@@ -11,12 +12,27 @@ const initialState = {
 }
 
 function LoginPage() {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const [form, setForm] = useState(initialState)
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
   const navigate = useNavigate()
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setApiError('')
+
+    try {
+      setLoading(true)
+      await googleAuth({ credential: credentialResponse?.credential })
+      navigate('/dashboard')
+    } catch (error) {
+      setApiError(error?.response?.data?.message || error.message || 'Google sign in failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const validate = () => {
     const next = {}
@@ -164,7 +180,11 @@ function LoginPage() {
           <span className="h-px flex-1 bg-white/10" />
         </div>
 
-        <GoogleButton onClick={() => alert('Google auth is available with backend integration.')}>Continue with Google</GoogleButton>
+        {googleClientId ? (
+          <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => setApiError('Google sign in failed. Please try again.')} />
+        ) : (
+          <GoogleButton disabled>Continue with Google</GoogleButton>
+        )}
 
         <p className="text-sm text-slate-400">
           New here?{' '}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { signup } from '../services/authService'
+import { GoogleLogin } from '@react-oauth/google'
+import { googleAuth, signup } from '../services/authService'
 import GoogleButton from '../components/GoogleButton'
 import LogoBadge from '../components/LogoBadge'
 
@@ -13,6 +14,7 @@ const initialState = {
 }
 
 function SignupPage() {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const [form, setForm] = useState(initialState)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -20,6 +22,20 @@ function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState('')
   const navigate = useNavigate()
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setApiError('')
+
+    try {
+      setLoading(true)
+      await googleAuth({ credential: credentialResponse?.credential })
+      navigate('/dashboard')
+    } catch (error) {
+      setApiError(error?.response?.data?.message || error.message || 'Google sign up failed. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const validate = () => {
     const next = {}
@@ -223,7 +239,11 @@ function SignupPage() {
               <span className="h-px flex-1 bg-white/5" />
             </div>
 
-            <GoogleButton onClick={() => alert('Google signup is available with backend integration.')}>Sign up with Google</GoogleButton>
+            {googleClientId ? (
+              <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => setApiError('Google sign up failed. Please try again.')} />
+            ) : (
+              <GoogleButton disabled>Sign up with Google</GoogleButton>
+            )}
 
             <p className="mt-4 text-center text-sm text-slate-400">🔒 Your resume data is encrypted and secure.</p>
             <p className="mt-2 text-center text-sm text-slate-400">Trusted by 1000+ students and job seekers</p>
