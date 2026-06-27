@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { googleAuth, signup } from '../services/authService'
@@ -67,6 +68,7 @@ function SignupPage() {
     try {
       setLoading(true)
       await signup({ fullName: form.fullName, email: form.email, password: form.password })
+      toast.success('Account created successfully')
       navigate('/dashboard')
     } catch (error) {
       setApiError(error?.response?.data?.message || error.message || 'Signup failed. Please try again.')

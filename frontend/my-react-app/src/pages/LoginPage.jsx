@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
 import { googleAuth, login } from '../services/authService'
@@ -26,6 +27,7 @@ function LoginPage() {
     try {
       setLoading(true)
       await googleAuth({ credential: credentialResponse?.credential })
+      toast.success('Welcome back to ResumeIQ')
       navigate('/dashboard')
     } catch (error) {
       setApiError(error?.response?.data?.message || error.message || 'Google sign in failed. Please try again.')
@@ -64,6 +66,7 @@ function LoginPage() {
     try {
       setLoading(true)
       await login({ email: form.email, password: form.password })
+      toast.success('Signed in successfully')
       navigate('/dashboard')
     } catch (error) {
       setApiError(error?.response?.data?.message || error.message || 'Login failed. Please try again.')

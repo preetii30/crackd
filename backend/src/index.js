@@ -1,12 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
+import path from "path";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
+import resumeRoutes from "./routes/resume.routes.js";
 import { connectDB } from "./lib/db.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
-dotenv.config({ path: "./src/.env" });
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 const app = express();
 
 const PORT = process.env.PORT || 5001;
@@ -20,6 +23,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/resumes", resumeRoutes);
+app.use(errorHandler);
 
 app.listen(PORT,() =>{
     console.log(`Server is running on port ${PORT}`);  

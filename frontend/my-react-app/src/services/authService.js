@@ -6,41 +6,50 @@ const client = axios.create({
   timeout: 10000,
 })
 
+function persistAuth(payload = {}) {
+  try {
+    const token = payload?.token
+    const user = payload?.user || payload
+
+    if (token) {
+      localStorage.setItem('crackd_token', token)
+    }
+
+    if (user) {
+      localStorage.setItem('crackd_user', JSON.stringify(user))
+    }
+  } catch (_error) {
+    // Ignore storage issues in private browsing or restricted environments.
+  }
+}
+
 export async function login({ email, password }) {
   const response = await client.post('/auth/login', { email, password })
-  const token = response?.data?.token
+  const payload = response?.data || response || {}
+  persistAuth(payload)
 
-  if (token) {
-    localStorage.setItem('crackd_token', token)
-  }
-
-  return response.data
+  return payload
 }
 
 export async function signup({ fullName, email, password }) {
   const response = await client.post('/auth/signup', { fullName, email, password })
-  const token = response?.data?.token
+  const payload = response?.data || response || {}
+  persistAuth(payload)
 
-  if (token) {
-    localStorage.setItem('crackd_token', token)
-  }
-
-  return response.data
+  return payload
 }
 
 export async function googleAuth({ credential }) {
   const response = await client.post('/auth/google', { credential })
-  const token = response?.data?.token
+  const payload = response?.data || response || {}
+  persistAuth(payload)
 
-  if (token) {
-    localStorage.setItem('crackd_token', token)
-  }
-
-  return response.data
+  return payload
 }
 
 export function logout() {
   localStorage.removeItem('crackd_token')
+  localStorage.removeItem('crackd_user')
 }
 
 export function getAuthToken() {
