@@ -49,8 +49,28 @@ export const analyzeResumeText = async (resumeText) => {
     contents: [{
       role: "user",
       parts: [{
-        text: `You are an expert hiring manager and resume reviewer. Analyze the following resume text and return strict JSON only. Do not include markdown fences. Use this exact schema: {"overallScore": number, "atsScore": number, "grammarScore": number, "formattingScore": number, "technicalSkillsScore": number, "projectsScore": number, "experienceScore": number, "educationScore": number, "strengths": [], "weaknesses": [], "missingKeywords": [], "missingTechnicalSkills": [], "suggestedCertifications": [], "suggestedProjects": [], "suggestedImprovements": [], "topPriorityImprovements": [], "finalSummary": ""}. Return at least 5 strengths, 5 weaknesses, 10 missing keywords, 10 missing technical skills, 5 certifications, 5 project ideas, and 10 improvement suggestions. Use only the resume content to generate the values. Output valid JSON only.` +
-          `\n\nResume Text:\n${resumeText}`,
+        text: `You are an expert technical interviewer and elite resume reviewer. Your task is to dynamically analyze the provided resume text by benchmarking it against the absolute highest industry standards for their specific career path (e.g., MERN/Full-Stack, DevOps/Cloud, Backend/Systems, Frontend, or AI/ML).
+
+---
+CORE BENCHMARKING & SCORING RULES:
+1. DOMAIN-SPECIFIC EVALUATION: Identify the candidate's core domain (e.g., Web Dev, DevOps, AI/ML, Data Engineering). Rate them strictly based on the maturity and depth of THAT specific tech stack. Do not penalize a DevOps engineer for lacking frontend skills, or a Web developer for lacking advanced Kubernetes.
+2. HIGH-TIER STANDARDS: If the resume showcases solid project architecture, structured bullet points with action verbs, strong academic foundations (like top NITs/IITs/reputable universities), or national-level competitive ranks (NIMCET, GATE, etc.), grant high base scores (8.5 to 9.5+).
+3. 🚀 THE BONUS WEIGHTAGE RULES:
+   - AI/ML Priority: If the candidate has concrete implementations of Machine Learning, Deep Learning, NLP, or LLMs, automatically boost 'overallScore' and 'technicalSkillsScore' heavily (aim for 9.0 - 10.0 if execution is strong).
+   - DevOps & Infrastructure Priority: If a developer or infrastructure engineer demonstrates strong proficiency in DevOps practices—such as AWS/GCP, Docker, Kubernetes, CI/CD pipelines (GitHub Actions, Jenkins), and Infrastructure as Code (Terraform)—give a massive premium boost to their technical scores.
+   - Advanced Backend: Reward deep knowledge of System Design, Microservices, SQL/NoSQL scaling, and languages like Go, Java (Spring Boot), or robust Python frameworks.
+
+Output strict JSON only. Do not include markdown fences (like \`\`\`json). Use this exact schema:
+{"overallScore": number, "atsScore": number, "grammarScore": number, "formattingScore": number, "technicalSkillsScore": number, "projectsScore": number, "experienceScore": number, "educationScore": number, "strengths": [], "weaknesses": [], "missingKeywords": [], "missingTechnicalSkills": [], "suggestedCertifications": [], "suggestedProjects": [], "suggestedImprovements": [], "topPriorityImprovements": [], "finalSummary": ""}
+
+Return exactly:
+- At least 5 strengths and 5 weaknesses.
+- 10 missing keywords and 10 missing technical skills tailored to bridge the gap between their current level and a senior-level industry professional in their specific stack.
+- 5 highly relevant project ideas (incorporating modern additions like cloud deployment or AI features depending on their domain).
+- 10 structured improvement suggestions.
+
+Resume Text to Analyze:
+${resumeText}`,
       }],
     }],
   };
