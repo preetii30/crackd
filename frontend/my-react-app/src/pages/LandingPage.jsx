@@ -1,5 +1,41 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import SectionHeading from '../components/SectionHeading'
+
+const dashboardVariants = {
+  hidden: { opacity: 0, y: 150, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: 'spring',
+      damping: 24,
+      stiffness: 180,
+      mass: 0.9,
+    },
+  },
+  float: {
+    y: [0, -12, 0],
+    rotate: [0, 1, 0, -1, 0],
+    scale: [1, 1.01, 1],
+    transition: {
+      duration: 6,
+      ease: 'easeInOut',
+      repeat: Infinity,
+      repeatType: 'reverse',
+    },
+  },
+}
+
+const heroStyles = `
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+`
 
 const features = [
   { title: 'ATS-first feedback', body: 'Get actionable scoring and keyword guidance tailored to your target role.' },
@@ -17,65 +53,188 @@ const faqs = [
   { question: 'Is my resume stored securely?', answer: 'Your uploaded PDF and generated analysis are stored behind your authenticated account.' },
 ]
 
+function AnimatedCounter({ value, prefix = '', suffix = '', className }) {
+  const motionValue = useMotionValue(0)
+  const displayValue = useTransform(motionValue, (latest) => `${prefix}${Math.round(latest)}${suffix}`)
+
+  useEffect(() => {
+    const controls = animate(motionValue, value, {
+      duration: 1.4,
+      delay: 1.8,
+      ease: [0.22, 1, 0.36, 1],
+    })
+
+    return controls.stop
+  }, [motionValue, value])
+
+  return <motion.span className={className}>{displayValue}</motion.span>
+}
+
 function LandingPage() {
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+  const smoothX = useSpring(mouseX, { stiffness: 80, damping: 20 })
+  const smoothY = useSpring(mouseY, { stiffness: 80, damping: 20 })
+
+  const rotateX = useTransform(smoothY, [-30, 30], [4, -4])
+  const rotateY = useTransform(smoothX, [-30, 30], [-4, 4])
+
+  const handleMouseMove = (event) => {
+    const { clientX, clientY, currentTarget } = event
+    const { left, top, width, height } = currentTarget.getBoundingClientRect()
+    const x = ((clientX - left) / width - 0.5) * 60
+    const y = ((clientY - top) / height - 0.5) * 60
+    mouseX.set(x)
+    mouseY.set(y)
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
+    <>
+      <style>{heroStyles}</style>
+      <div className="min-h-screen bg-[#030712] text-slate-100">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-600 font-semibold text-slate-950">RI</div>
-          <div>
-            <p className="text-lg font-semibold text-white">ResumeIQ</p>
+        <div className="group flex items-center gap-3 cursor-pointer">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 to-sky-600 transition-transform duration-300 group-hover:animate-floating">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/25">
+              <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
+            </div>
+          </div>
+          <div className="transition-transform duration-300 group-hover:animate-floating">
+            <p className="text-lg font-semibold text-white">cracKd</p>
             <p className="text-xs uppercase tracking-[0.32em] text-slate-400">AI Resume Analyst</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <Link to="/login" className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300">Login</Link>
-          <Link to="/signup" className="rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Signup</Link>
+          <Link to="/signup" className="rounded-full bg-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Get Started</Link>
         </div>
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8 lg:py-24">
+        <section className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:px-8 lg:py-24">
+          <motion.div
+            className="absolute inset-0 -z-10 overflow-hidden rounded-[2.5rem]"
+            style={{
+              background: 'linear-gradient(135deg, #020617 0%, #061c2f 45%, #0a2745 100%)',
+              backgroundSize: '300% 300%',
+              animation: 'gradientMove 12s ease infinite',
+            }}
+          >
+            <div className="absolute inset-0 opacity-70" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+            <motion.div
+              className="absolute -top-40 -right-40 h-[500px] w-[500px] rounded-full bg-cyan-500/20 blur-[150px]"
+              animate={{ x: [0, 40, 0], y: [0, -30, 0], scale: [1, 1.1, 1] }}
+              transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="absolute bottom-[-15%] left-[10%] h-80 w-80 rounded-full bg-sky-500/15 blur-3xl"
+              animate={{ x: [0, -20, 0], y: [0, 25, 0], opacity: [0.2, 0.35, 0.2] }}
+              transition={{ duration: 8, ease: 'easeInOut', repeat: Infinity }}
+            />
+          </motion.div>
+
           <div className="max-w-2xl">
-            <p className="inline-flex rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-sm font-medium text-cyan-300">AI-powered resume feedback for modern applicants</p>
-            <h1 className="mt-6 text-5xl font-semibold tracking-tight text-white sm:text-6xl">Improve your resume with AI.</h1>
-            <p className="mt-6 text-xl leading-8 text-slate-400">ResumeIQ analyzes your resume for ATS performance, clarity, and role-fit so you can submit stronger applications with confidence.</p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link to="/signup" className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Start free</Link>
-              <Link to="/login" className="rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300">See dashboard</Link>
-            </div>
-            <div className="mt-10 flex flex-wrap gap-6 text-sm text-slate-400">
+            <motion.p
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              className="inline-flex rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-sm font-medium text-cyan-300"
+            >
+              AI-powered resume feedback for modern applicants
+            </motion.p>
+            <motion.h1
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-6 text-5xl font-black leading-[0.88] tracking-[-0.06em] text-white sm:text-6xl md:text-8xl"
+              style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900 }}
+            >
+              Improve your resume
+              <br />
+              <span className="bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 bg-clip-text text-transparent">
+                with AI.
+              </span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-6 text-xl leading-8 text-slate-400"
+            >
+              ResumeIQ analyzes your resume for ATS performance, clarity, and role-fit so you can submit stronger applications with confidence.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-8 flex flex-wrap gap-4"
+            >
+              <Link to="/signup" className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Get Started</Link>
+              <Link to="/login" className="rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300">Watch Demo</Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              className="mt-10 flex flex-wrap gap-6 text-sm text-slate-400"
+            >
               <span>✓ ATS optimization</span>
               <span>✓ Real AI analysis</span>
               <span>✓ Actionable upgrades</span>
-            </div>
+            </motion.div>
           </div>
 
-          <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/80 p-8 shadow-2xl shadow-slate-950/40">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.22),_transparent_35%)]" />
-            <div className="relative space-y-6">
-              <div className="rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-6">
-                <p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Resume score</p>
-                <div className="mt-4 flex items-end gap-3">
-                  <span className="text-5xl font-semibold text-white">84</span>
-                  <span className="pb-2 text-slate-400">/ 100</span>
+          <motion.div
+            className="relative min-h-[420px]"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={() => {
+              mouseX.set(0)
+              mouseY.set(0)
+            }}
+            style={{ x: smoothX, y: smoothY, rotateX, rotateY, transformPerspective: 1200 }}
+          >
+            <motion.div
+              variants={dashboardVariants}
+              initial="hidden"
+              animate={['visible', 'float']}
+              className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/70 p-8 shadow-[0_30px_80px_rgba(2,132,199,0.25)] backdrop-blur-xl"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.22),_transparent_35%)]" />
+              <div className="relative space-y-6">
+                <div className="rounded-3xl border border-cyan-400/20 bg-slate-950/80 p-6">
+                  <p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Resume score</p>
+                  <div className="mt-4 flex items-end gap-3">
+                    <AnimatedCounter value={84} className="text-5xl font-semibold text-white" />
+                    <span className="pb-2 text-slate-400">/ 100</span>
+                  </div>
+                  <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-800">
+                    <motion.div
+                      initial={{ width: '0%' }}
+                      animate={{ width: '84%' }}
+                      transition={{ delay: 1.9, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-sky-500"
+                    />
+                  </div>
                 </div>
-                <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-800">
-                  <div className="h-full w-[84%] rounded-full bg-gradient-to-r from-cyan-400 to-sky-500" />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
+                    <p className="text-sm font-medium text-slate-300">ATS score</p>
+                    <div className="mt-2 text-2xl font-semibold text-white">
+                      <AnimatedCounter value={91} />
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
+                    <p className="text-sm font-medium text-slate-300">Keywords</p>
+                    <div className="mt-2 text-2xl font-semibold text-white">
+                      <AnimatedCounter value={12} prefix="+" />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
-                  <p className="text-sm font-medium text-slate-300">ATS score</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">91</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-4">
-                  <p className="text-sm font-medium text-slate-300">Keywords</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">+12</p>
-                </div>
-              </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </section>
 
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -150,6 +309,7 @@ function LandingPage() {
         </div>
       </footer>
     </div>
+    </>
   )
 }
 

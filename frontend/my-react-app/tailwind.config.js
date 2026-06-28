@@ -9,6 +9,15 @@ export default {
       borderRadius: {
         '3xl': '1.75rem',
       },
+      keyframes: {
+        floating: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-5px)' },
+        },
+      },
+      animation: {
+        floating: 'floating 3s ease-in-out infinite',
+      },
     },
   },
   plugins: [],
