@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { Github, Linkedin } from 'lucide-react'
 import SectionHeading from '../components/SectionHeading'
 
 const dashboardVariants = {
@@ -47,11 +48,24 @@ const steps = ['Upload your PDF', 'Let Gemini review it', 'Improve with real rec
 
 const benefits = ['Faster application prep', 'Sharper resume positioning', 'Higher confidence across interviews']
 
-const faqs = [
-  { question: 'What file types are supported?', answer: 'ResumeIQ accepts PDF resumes only for reliable parsing and analysis.' },
-  { question: 'How fast is the analysis?', answer: 'Most resumes are reviewed within a few seconds depending on document length.' },
-  { question: 'Is my resume stored securely?', answer: 'Your uploaded PDF and generated analysis are stored behind your authenticated account.' },
+const developers = [
+  {
+    name: 'Preeti Patidar',
+    role: "MCA'28",
+    institute: 'Motilal Nehru National Institute of Technology',
+    linkedin: 'https://www.linkedin.com/in/preeti-patidar-783607308/',
+    github: 'https://github.com/preetii30',
+  },
+  {
+    name: 'Dhawal Gilke',
+    role: "MCA'28",
+    institute: 'Motilal Nehru National Institute of Technology',
+    linkedin: 'https://www.linkedin.com/in/dhawal-gilke-346a24230/',
+    github: 'https://github.com/pureDhawal',
+  },
 ]
+
+const stackItems = ['MERN Stack', 'Gemini AI', 'Cloudinary']
 
 function AnimatedCounter({ value, prefix = '', suffix = '', className }) {
   const motionValue = useMotionValue(0)
@@ -284,17 +298,66 @@ function LandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <SectionHeading eyebrow="FAQ" title="Common questions" />
-          <div className="mt-10 space-y-4">
-            {faqs.map((faq) => (
-              <div key={faq.question} className="rounded-3xl border border-white/10 bg-slate-900/70 p-6">
-                <h3 className="text-lg font-semibold text-white">{faq.question}</h3>
-                <p className="mt-2 text-slate-400">{faq.answer}</p>
-              </div>
-            ))}
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8"
+        >
+          <div className="mb-10 text-center lg:text-left">
+            <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">Built with intent</p>
+            <h2 className="mt-3 text-4xl font-black tracking-[-0.04em] text-white sm:text-5xl">Developed By</h2>
           </div>
-        </section>
+
+          <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+            <div className="grid gap-6 md:grid-cols-2">
+              {developers.map((developer, index) => (
+                <motion.div
+                  key={developer.name}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: index * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover={{ y: -6, scale: 1.01, boxShadow: '0 0 0 1px rgba(34,211,238,0.18), 0 20px 50px rgba(34,211,238,0.16)' }}
+                  className="rounded-[24px] border border-white/10 bg-slate-900/80 p-8 shadow-[0_20px_60px_rgba(2,132,199,0.12)] backdrop-blur-xl transition-colors"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400/10 text-lg font-semibold text-cyan-300">
+                    {developer.name.charAt(0)}
+                  </div>
+                  <h3 className="mt-6 text-2xl font-semibold text-white">{developer.name}</h3>
+                  <p className="mt-2 text-sm font-medium uppercase tracking-[0.24em] text-cyan-300">{developer.role}</p>
+                  <p className="mt-4 text-sm leading-7 text-slate-400">{developer.institute}</p>
+                  <div className="mt-8 flex items-center gap-3">
+                    <a href={developer.linkedin} className="rounded-full border border-white/10 p-2.5 text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300" aria-label="LinkedIn">
+                      <Linkedin size={18} />
+                    </a>
+                    <a href={developer.github} className="rounded-full border border-white/10 p-2.5 text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300" aria-label="GitHub">
+                      <Github size={18} />
+                    </a>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              className="rounded-[24px] border border-white/10 bg-slate-900/70 p-8 shadow-[0_20px_60px_rgba(2,132,199,0.12)] backdrop-blur-xl"
+            >
+              <h3 className="text-xl font-semibold text-white">Technology Stack</h3>
+              <div className="mt-8 space-y-4">
+                {stackItems.map((item) => (
+                  <div key={item} className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-medium text-cyan-300">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </motion.section>
       </main>
 
       <footer className="border-t border-white/10 bg-slate-950/70 px-4 py-10 sm:px-6 lg:px-8">
