@@ -30,3 +30,15 @@ export async function getResumeReport(id) {
 export async function deleteResumeReport(id) {
   return client.delete(`/resumes/${id}`)
 }
+
+export async function generateAISuggestions(id) {
+  return client.post(`/resumes/${id}/ai-suggestions`)
+}
+
+export async function generateCoverLetter(id, jobDescription = '') {
+  return client.post(`/resumes/${id}/cover-letter`, { jobDescription })
+}
+
+export async function generateInterviewQuestions(id) {
+  return client.post(`/resumes/${id}/interview-questions`)
+}

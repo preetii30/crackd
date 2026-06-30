@@ -59,6 +59,65 @@ const resumeReportSchema = new mongoose.Schema(
       suggestedImprovements: [{ type: String }],
       topPriorityImprovements: [{ type: String }],
       finalSummary: { type: String, default: "" },
+      analysisSource: { type: String, default: "" },
+    },
+    failureReason: {
+      type: String,
+      default: "",
+    },
+    aiSuggestions: {
+      sections: [
+        {
+          title: String,
+          suggestions: [String],
+          priority: { type: String, enum: ["high", "medium", "low"] },
+        },
+      ],
+      quickWins: [String],
+      longTermStrategy: String,
+      estimatedImpact: String,
+      generatedAt: Date,
+    },
+    coverLetters: [
+      {
+        letterContent: String,
+        sections: {
+          opening: String,
+          bodyHighlights: [String],
+          closing: String,
+        },
+        tone: String,
+        jobDescription: String,
+        generatedAt: Date,
+      },
+    ],
+    interviewQuestions: {
+      technicalQuestions: [
+        {
+          question: String,
+          difficulty: { type: String, enum: ["beginner", "intermediate", "advanced"] },
+          topic: String,
+        },
+      ],
+      projectQuestions: [
+        {
+          question: String,
+          expectedAnswer: String,
+        },
+      ],
+      systemDesignQuestions: [
+        {
+          question: String,
+          complexity: { type: String, enum: ["easy", "medium", "hard"] },
+        },
+      ],
+      behavioralQuestions: [
+        {
+          question: String,
+          relatedTo: String,
+        },
+      ],
+      generatedAt: Date,
     },
     uploadedAt: {
       type: Date,

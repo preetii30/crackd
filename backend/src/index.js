@@ -26,7 +26,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use(errorHandler);
 
-app.listen(PORT,() =>{
-    console.log(`Server is running on port ${PORT}`);  
-    connectDB(); 
-})
+const startServer = async () => {
+  await connectDB();
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error("Server failed to start:", error);
+  process.exit(1);
+});
