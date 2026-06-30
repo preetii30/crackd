@@ -27,6 +27,10 @@ export async function getResumeReport(id) {
   return client.get(`/resumes/${id}`)
 }
 
+export async function downloadResumeReport(id) {
+  return client.get(`/resumes/${id}/download`, { responseType: 'blob' })
+}
+
 export async function deleteResumeReport(id) {
   return client.delete(`/resumes/${id}`)
 }

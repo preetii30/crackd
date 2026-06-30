@@ -57,7 +57,7 @@ export default function LogoIntro({ onComplete }) {
         {/* Brand text with fade-in */}
         <div className="brand-text">
           <h1>cracKd</h1>
-          <p>AI Resume Analyst</p>
+          <p>ai resume analyst</p>
         </div>
       </div>
 

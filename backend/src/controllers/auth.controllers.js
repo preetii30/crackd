@@ -153,16 +153,62 @@ export const logout = (req, res) => {
 
 export const updateProfile = async (req, res) => {
     try {
-        const {profilePic} = req.body;
         const userId = req.user._id;
-        if(!profilePic) {
-            return res.status(400).json({message:"Profile picture URL is required"});
+        const { fullName, email, username, bio, profilePic, currentPassword, password } = req.body;
+
+        const currentUser = await User.findById(userId).select('+password');
+        if (!currentUser) {
+            return res.status(404).json({ message: 'User not found' });
         }
-        const uploadResponse = await cloudinary.uploader.upload(profilePic);
-        const updatedUser = await User.findByIdAndUpdate(userId, { profilePic: uploadResponse.secure_url }, { new: true });
-        res.status(200).json({ updatedUser });
-    } catch (error) {    
-            console.error("Error during profile update:", error.message);
+
+        const updatePayload = {};
+        if (fullName) updatePayload.fullName = fullName;
+        if (email) updatePayload.email = email;
+        if (username) updatePayload.username = username;
+        if (bio !== undefined) updatePayload.bio = bio;
+
+        if (password !== undefined && password !== '') {
+            if (currentUser.password) {
+                if (!currentPassword) {
+                    return res.status(400).json({ message: 'Current password is required to change password' });
+                }
+                const passwordMatch = await bcrypt.compare(currentPassword, currentUser.password);
+                if (!passwordMatch) {
+                    return res.status(400).json({ message: 'Current password is incorrect' });
+                }
+            }
+            if (password.length < 6) {
+                return res.status(400).json({ message: 'New password must be at least 6 characters long' });
+            }
+            const salt = await bcrypt.genSalt(10);
+            updatePayload.password = await bcrypt.hash(password, salt);
+        }
+
+        if (typeof profilePic === 'string' && profilePic.trim()) {
+            if (profilePic.startsWith('http')) {
+                updatePayload.profilePic = profilePic;
+            } else {
+                const uploadResponse = await cloudinary.uploader.upload(profilePic);
+                updatePayload.profilePic = uploadResponse.secure_url;
+            }
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updatePayload, {
+            new: true,
+            runValidators: true,
+            context: 'query',
+        }).select('-password');
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ user: updatedUser });
+    } catch (error) {
+        console.error("Error during profile update:", error.message);
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Username or email already in use' });
+        }
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 };

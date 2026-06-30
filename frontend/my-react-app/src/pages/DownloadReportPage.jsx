@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getAuthToken } from '../services/authService'
-import { getResumeHistory } from '../services/resumeService'
+import { getResumeHistory, downloadResumeReport } from '../services/resumeService'
 
 function DownloadReportPage() {
-  const [token, setToken] = useState(null)
   const [history, setHistory] = useState([])
   const [downloading, setDownloading] = useState({})
   const navigate = useNavigate()
@@ -15,7 +14,6 @@ function DownloadReportPage() {
       navigate('/login')
       return
     }
-    setToken(authToken)
     loadHistory()
   }, [navigate])
 
@@ -29,14 +27,25 @@ function DownloadReportPage() {
     }
   }
 
-  const handleDownloadPDF = (reportId, fileName) => {
-    setDownloading(prev => ({ ...prev, [reportId]: true }))
-    
-    // Simulate download
-    setTimeout(() => {
-      setDownloading(prev => ({ ...prev, [reportId]: false }))
-      console.log(`Downloading report: ${fileName}`)
-    }, 1500)
+  const handleDownloadPDF = async (reportId, fileName) => {
+    setDownloading((prev) => ({ ...prev, [reportId]: true }))
+    try {
+      const response = await downloadResumeReport(reportId)
+      const fileBlob = new Blob([response.data], { type: 'application/pdf' })
+      const url = URL.createObjectURL(fileBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName.toLowerCase().endsWith('.pdf') ? fileName : `${fileName}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Download failed:', error)
+      alert(error?.response?.data?.message || 'Unable to download the report.')
+    } finally {
+      setDownloading((prev) => ({ ...prev, [reportId]: false }))
+    }
   }
 
   return (

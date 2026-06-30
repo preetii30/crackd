@@ -4,6 +4,7 @@ import {
   uploadResume, 
   getAnalysisHistory, 
   getSingleReport, 
+  downloadReport,
   deleteReport,
   generateAISuggestionsController,
   getCoverLetterController,
@@ -16,6 +17,7 @@ const router = express.Router();
 
 router.post("/upload", protectRoute, uploadResumeMiddleware, validateUploadResume, uploadResume);
 router.get("/history", protectRoute, getAnalysisHistory);
+router.get("/:id/download", protectRoute, validateResumeId, downloadReport);
 router.get("/:id", protectRoute, validateResumeId, getSingleReport);
 router.delete("/:id", protectRoute, validateResumeId, deleteReport);
 

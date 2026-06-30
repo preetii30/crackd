@@ -165,6 +165,27 @@ export const getSingleReport = async (req, res, next) => {
   }
 };
 
+export const downloadReport = async (req, res, next) => {
+  try {
+    const report = await ResumeReport.findOne({ _id: req.params.id, userId: req.user._id });
+    if (!report) {
+      return res.status(404).json({ message: "Resume report not found." });
+    }
+
+    if (!report.filePath) {
+      return res.status(404).json({ message: "Resume file is unavailable." });
+    }
+
+    return res.download(report.filePath, report.originalName, (err) => {
+      if (err) {
+        next(err);
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deleteReport = async (req, res, next) => {
   try {
     const report = await ResumeReport.findOne({ _id: req.params.id, userId: req.user._id });

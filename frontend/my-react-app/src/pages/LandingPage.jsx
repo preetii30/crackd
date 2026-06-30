@@ -116,8 +116,8 @@ function LandingPage() {
             </div>
           </div>
           <div className="transition-transform duration-300 group-hover:animate-floating">
-            <p className="text-lg font-semibold text-white">cracKd</p>
-            <p className="text-xs uppercase tracking-[0.32em] text-slate-400">AI Resume Analyst</p>
+            <p className="text-lg font-semibold text-white">crackd</p>
+            <p className="text-xs uppercase tracking-[0.32em] text-slate-400">ai resume analyst</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ function LandingPage() {
               transition={{ duration: 0.9, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
               className="mt-6 text-xl leading-8 text-slate-400"
             >
-              ResumeIQ analyzes your resume for ATS performance, clarity, and role-fit so you can submit stronger applications with confidence.
+              crackd analyzes your resume for ATS performance, clarity, and role-fit so you can submit stronger applications with confidence.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 18 }}
@@ -270,7 +270,7 @@ function LandingPage() {
               <div key={step} className="rounded-3xl border border-white/10 bg-slate-900/70 p-8">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-400/20 text-sm font-semibold text-cyan-300">0{index + 1}</div>
                 <h3 className="mt-4 text-xl font-semibold text-white">{step}</h3>
-                <p className="mt-3 text-slate-400">ResumeIQ takes your PDF and turns it into a professional review grounded in AI analysis.</p>
+                <p className="mt-3 text-slate-400">crackd takes your PDF and turns it into a professional review grounded in AI analysis.</p>
               </div>
             ))}
           </div>
@@ -290,7 +290,7 @@ function LandingPage() {
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <SectionHeading eyebrow="Testimonials" title="Trusted by candidates preparing for their next move" />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {['“ResumeIQ helped me rework my summary and align my skills for product roles.”', '“The suggestions were specific and easy to apply immediately.”', '“I finally understood why my applications were getting ignored.”'].map((quote) => (
+            {['"crackd helped me rework my summary and align my skills for product roles."', '"The suggestions were specific and easy to apply immediately."', '"I finally understood why my applications were getting ignored."'].map((quote) => (
               <div key={quote} className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 text-slate-300">
                 <p>{quote}</p>
               </div>
@@ -362,7 +362,7 @@ function LandingPage() {
 
       <footer className="border-t border-white/10 bg-slate-950/70 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
-          <p>© 2026 ResumeIQ. Built for real job seekers.</p>
+          <p>© 2026 crackd. Built for real job seekers.</p>
           <div className="flex flex-wrap gap-4">
             <a href="#" className="transition hover:text-cyan-300">About</a>
             <a href="#" className="transition hover:text-cyan-300">Contact</a>

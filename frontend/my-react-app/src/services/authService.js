@@ -47,6 +47,21 @@ export async function googleAuth({ credential }) {
   return payload
 }
 
+export async function getCurrentUser() {
+  const response = await client.get('/auth/check')
+  return response?.data || {}
+}
+
+export async function updateProfile(data) {
+  const response = await client.put('/auth/update-profile', data)
+  const payload = response?.data || {}
+  const user = payload.user || payload
+  if (user) {
+    localStorage.setItem('crackd_user', JSON.stringify(user))
+  }
+  return user
+}
+
 export function logout() {
   localStorage.removeItem('crackd_token')
   localStorage.removeItem('crackd_user')

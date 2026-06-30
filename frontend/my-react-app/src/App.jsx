@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import LogoIntro from './components/LogoIntro'
 import DashboardLayout from './layouts/DashboardLayout'
 import LandingPage from './pages/LandingPage'
@@ -15,15 +15,23 @@ import CoverLetterPage from './pages/CoverLetterPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import DownloadReportPage from './pages/DownloadReportPage'
 import SettingsPage from './pages/SettingsPage'
+import ProfilePage from './pages/ProfilePage'
 
 function App() {
   const [showIntro, setShowIntro] = useState(true)
+  const [theme, setTheme] = useState(() => localStorage.getItem('crackd_theme') || 'dark')
+
+  useEffect(() => {
+    document.body.classList.toggle('theme-light', theme === 'light')
+    document.body.classList.toggle('theme-dark', theme === 'dark')
+    localStorage.setItem('crackd_theme', theme)
+  }, [theme])
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-950 text-slate-100">
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-950'}`}>
         {showIntro ? <LogoIntro onComplete={() => setShowIntro(false)} /> : null}
-        <Toaster position="top-right" toastOptions={{ className: 'bg-slate-900 text-slate-100' }} />
+        <Toaster position="top-right" toastOptions={{ className: theme === 'dark' ? 'bg-slate-900 text-slate-100' : 'bg-white text-slate-950' }} />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -39,7 +47,8 @@ function App() {
             <Route path="/cover-letter" element={<CoverLetterPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/download-report" element={<DownloadReportPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/settings" element={<SettingsPage theme={theme} setTheme={setTheme} />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
           
           <Route path="*" element={<Navigate replace to="/" />} />
