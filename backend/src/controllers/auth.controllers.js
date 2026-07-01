@@ -32,10 +32,20 @@ export const signup = async (req, res) => {
         });
 
        if(newUser){
-        const token = generateToken(newUser._id, res);
         await newUser.save();
-        res.status(201).json({ message: "User registered successfully", token });
-       }else{
+        const token = generateToken(newUser._id, res);
+        res.status(201).json({
+          message: "User registered successfully",
+          token,
+          user: {
+            _id: newUser._id,
+            fullName: newUser.fullName,
+            email: newUser.email,
+            profilePic: newUser.profilePic,
+            authProvider: newUser.authProvider,
+          },
+        });
+       } else {
         res.status(400).json({message:"Failed to register user"});
        }
     }catch(error){
