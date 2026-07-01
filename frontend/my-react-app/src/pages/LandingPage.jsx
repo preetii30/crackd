@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { Github, Linkedin } from 'lucide-react'
+import { AnimatePresence, animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { Github, Linkedin, Play, X } from 'lucide-react'
 import SectionHeading from '../components/SectionHeading'
+import demoVideo from '../../demo.mp4'
 
 const dashboardVariants = {
   hidden: { opacity: 0, y: 150, scale: 0.96 },
@@ -89,6 +90,8 @@ function LandingPage() {
   const mouseY = useMotionValue(0)
   const smoothX = useSpring(mouseX, { stiffness: 80, damping: 20 })
   const smoothY = useSpring(mouseY, { stiffness: 80, damping: 20 })
+  const videoRef = useRef(null)
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
 
   const rotateX = useTransform(smoothY, [-30, 30], [4, -4])
   const rotateY = useTransform(smoothX, [-30, 30], [-4, 4])
@@ -101,6 +104,52 @@ function LandingPage() {
     mouseX.set(x)
     mouseY.set(y)
   }
+
+  const openDemo = () => {
+    setIsDemoOpen(true)
+  }
+
+  const closeDemo = () => {
+    const videoElement = videoRef.current
+
+    if (videoElement) {
+      videoElement.pause()
+      videoElement.currentTime = 0
+    }
+
+    setIsDemoOpen(false)
+  }
+
+  useEffect(() => {
+    if (!isDemoOpen) {
+      document.body.style.overflow = ''
+      return undefined
+    }
+
+    document.body.style.overflow = 'hidden'
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeDemo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    const videoElement = videoRef.current
+    if (videoElement) {
+      videoElement.currentTime = 0
+      videoElement.play().catch(() => {})
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', handleKeyDown)
+      if (videoRef.current) {
+        videoRef.current.pause()
+      }
+    }
+  }, [isDemoOpen])
 
   return (
     <>
@@ -186,7 +235,10 @@ function LandingPage() {
               className="mt-8 flex flex-wrap gap-4"
             >
               <Link to="/signup" className="rounded-full bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">Get Started</Link>
-              <Link to="/login" className="rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300">Watch Demo</Link>
+              <button type="button" onClick={openDemo} className="inline-flex items-center gap-2 rounded-full border border-white/10 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-400 hover:text-cyan-300">
+                <Play size={16} className="fill-current" />
+                Watch Demo
+              </button>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 14 }}
@@ -359,6 +411,54 @@ function LandingPage() {
           </div>
         </motion.section>
       </main>
+
+      <AnimatePresence>
+        {isDemoOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-8 backdrop-blur-xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            onClick={closeDemo}
+          >
+            <motion.div
+              className="relative w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#050816] shadow-[0_30px_120px_rgba(0,0,0,0.65)]"
+              initial={{ y: 28, scale: 0.96, opacity: 0 }}
+              animate={{ y: 0, scale: 1, opacity: 1 }}
+              exit={{ y: 18, scale: 0.98, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 24, mass: 0.85 }}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.18),_transparent_42%)]" />
+              <button
+                type="button"
+                onClick={closeDemo}
+                className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-slate-300 transition hover:border-cyan-400 hover:text-white"
+                aria-label="Close demo video"
+              >
+                <X size={20} />
+              </button>
+
+              <div className="relative p-4 sm:p-6">
+                <div className="overflow-hidden rounded-[1.75rem] border border-white/10 bg-black shadow-[0_20px_60px_rgba(0,0,0,0.45)] md:h-[600px] h-[70vh]">
+                  <video
+                    ref={videoRef}
+                    className="h-full w-full bg-black object-cover"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    poster="/favicon.svg"
+                  >
+                    <source src={demoVideo} type="video/mp4" />
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <footer className="border-t border-white/10 bg-slate-950/70 px-4 py-10 sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
