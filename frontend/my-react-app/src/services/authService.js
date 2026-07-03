@@ -48,8 +48,15 @@ export async function googleAuth({ credential }) {
 }
 
 export async function getCurrentUser() {
-  const response = await client.get('/auth/check')
-  return response?.data || {}
+  const token = getAuthToken();
+
+  const response = await client.get('/auth/check', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
 }
 
 export async function updateProfile(data) {
