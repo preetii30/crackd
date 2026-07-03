@@ -60,7 +60,14 @@ export async function getCurrentUser() {
 }
 
 export async function updateProfile(data) {
-  const response = await client.put('/auth/update-profile', data)
+  const token = getAuthToken();
+
+  const response = await client.put('/auth/update-profile', data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
   const payload = response?.data || {}
   const user = payload.user || payload
   if (user) {
