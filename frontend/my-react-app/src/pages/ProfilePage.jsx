@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import { ArrowLeft, Camera, User, AtSign, Mail, FileText, Save } from 'lucide-react'
 import { getAuthToken, getCurrentUser, updateProfile } from '../services/authService'
 
 function ProfilePage() {
   const [user, setUser] = useState({ fullName: '', username: '', email: '', bio: '', profilePic: '' })
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
 
@@ -27,6 +30,7 @@ function ProfilePage() {
         })
       } catch (error) {
         console.error('Unable to fetch profile:', error)
+        toast.error('Session expired. Please log in again.')
         navigate('/login')
       } finally {
         setLoading(false)
@@ -38,16 +42,19 @@ function ProfilePage() {
 
   const handleSave = async () => {
     try {
+      setSaving(true)
       await updateProfile(user)
-      alert('Profile changes saved.')
+      toast.success('Profile changes saved successfully!')
     } catch (error) {
       console.error('Profile save failed:', error)
-      alert(error?.response?.data?.message || 'Unable to save profile')
+      toast.error(error?.response?.data?.message || 'Unable to save profile')
+    } finally {
+      setSaving(false)
     }
   }
 
   if (loading) {
-    return <div className="p-6">Loading profile…</div>
+    return <div className="p-6 text-slate-400">Loading profile...</div>
   }
 
   const handlePhotoClick = () => {
@@ -62,6 +69,7 @@ function ProfilePage() {
     reader.onload = () => {
       if (reader.result) {
         setUser((prev) => ({ ...prev, profilePic: reader.result }))
+        toast.success('Photo selected! Click Save Changes to apply.')
       }
     }
     reader.readAsDataURL(file)
@@ -73,15 +81,14 @@ function ProfilePage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 text-white hover:bg-slate-800 transition"
+          aria-label="Go back"
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
+          <ArrowLeft className="h-5 w-5" />
         </button>
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-muted">Profile</p>
-          <h1 className="text-3xl font-semibold text-inherit">Manage your personal information</h1>
+          <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">Profile</p>
+          <h1 className="text-3xl font-semibold text-white">Manage your personal information</h1>
         </div>
       </header>
 
@@ -97,20 +104,21 @@ function ProfilePage() {
               alt="Profile avatar"
               className="h-full w-full object-cover"
             />
-            <span className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-950">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-                <path d="M5 20h14v-2H5v2zm7-18l5 5h-3v4h-4V7H7l5-5z" />
-              </svg>
-            </span>
+            <button
+              type="button"
+              onClick={handlePhotoClick}
+              className="absolute bottom-0 right-0 flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-slate-950 text-cyan-400 hover:text-white transition"
+              aria-label="Upload new photo"
+            >
+              <Camera className="h-5 w-5" />
+            </button>
           </div>
           <button
             type="button"
             onClick={handlePhotoClick}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold"
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 transition"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-              <path d="M5 20h14v-2H5v2zm7-18l5 5h-3v4h-4V7H7l5-5z" />
-            </svg>
+            <Camera className="h-4 w-4 text-cyan-400" />
             Change Photo
           </button>
           <input
@@ -124,33 +132,21 @@ function ProfilePage() {
 
         <div className="mt-10 space-y-4">
           <FieldRow
-            icon={
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-                <path d="M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z" />
-              </svg>
-            }
+            icon={<User className="h-5 w-5 text-cyan-400" />}
             label="Full Name"
             value={user.fullName}
             onChange={(value) => setUser((prev) => ({ ...prev, fullName: value }))}
           />
 
           <FieldRow
-            icon={
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-                <path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm3 4h6v2H9v-2z" />
-              </svg>
-            }
+            icon={<AtSign className="h-5 w-5 text-cyan-400" />}
             label="Username"
             value={user.username}
             onChange={(value) => setUser((prev) => ({ ...prev, username: value }))}
           />
 
           <FieldRow
-            icon={
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-                <path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm11 2l-5 3-5-3v2l5 3 5-3V8z" />
-              </svg>
-            }
+            icon={<Mail className="h-5 w-5 text-cyan-400" />}
             label="Email"
             value={user.email}
             onChange={(value) => setUser((prev) => ({ ...prev, email: value }))}
@@ -158,11 +154,7 @@ function ProfilePage() {
           />
 
           <FieldRow
-            icon={
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-                <path d="M5 20h14v-2H5v2zm13-11.59L12.41 14 10 11.59 16.59 5H18v1.41z" />
-              </svg>
-            }
+            icon={<FileText className="h-5 w-5 text-cyan-400" />}
             label="Bio"
             value={user.bio}
             onChange={(value) => setUser((prev) => ({ ...prev, bio: value }))}
@@ -173,12 +165,11 @@ function ProfilePage() {
         <button
           type="button"
           onClick={handleSave}
-          className="mt-8 flex w-full items-center justify-center gap-2 rounded-full border border-white/10 px-5 py-3 font-semibold"
+          disabled={saving}
+          className="mt-8 flex w-full items-center justify-center gap-2 rounded-full bg-cyan-500 hover:bg-cyan-400 px-5 py-3 font-semibold text-slate-950 transition disabled:opacity-70"
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5 text-white fill-current" aria-hidden="true">
-            <path d="M17 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V7l-4-4zm0 2l3 3h-3V5zM9 13h6v2H9v-2zm0 4h6v2H9v-2zM9 7h6v2H9V7z" />
-          </svg>
-          Save Changes
+          <Save className="h-5 w-5" />
+          {saving ? 'Saving Changes...' : 'Save Changes'}
         </button>
       </div>
     </div>
@@ -189,24 +180,24 @@ function FieldRow({ icon, label, value, onChange, textarea, type = 'text' }) {
   return (
     <label className="grid gap-3">
       <div className="flex items-center gap-3">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-slate-950">
           {icon}
         </span>
-        <span className="font-medium">{label}</span>
+        <span className="font-medium text-white">{label}</span>
       </div>
       {textarea ? (
         <textarea
           value={value}
           onChange={(event) => onChange(event.target.value)}
           rows={4}
-          className="w-full rounded-3xl border border-slate-700 bg-slate-950/95 px-4 py-4 text-slate-100 outline-none transition focus:border-sky-400 focus:ring-1 focus:ring-sky-400/20"
+          className="w-full rounded-3xl border border-slate-700 bg-slate-950/95 px-4 py-4 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20"
         />
       ) : (
         <input
           type={type}
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          className="w-full rounded-3xl border border-slate-700 bg-slate-950/95 px-4 py-4 text-slate-100 outline-none transition focus:border-sky-400 focus:ring-1 focus:ring-sky-400/20"
+          className="w-full rounded-3xl border border-slate-700 bg-slate-950/95 px-4 py-4 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/20"
         />
       )}
     </label>

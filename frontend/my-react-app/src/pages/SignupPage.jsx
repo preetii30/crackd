@@ -2,6 +2,7 @@ import { useState } from 'react'
 import toast from 'react-hot-toast'
 import { Link, useNavigate } from 'react-router-dom'
 import { GoogleLogin } from '@react-oauth/google'
+import { Lock } from 'lucide-react'
 import { googleAuth, signup } from '../services/authService'
 import GoogleButton from '../components/GoogleButton'
 import LogoBadge from '../components/LogoBadge'
@@ -247,7 +248,10 @@ function SignupPage() {
               <GoogleButton disabled>Sign up with Google</GoogleButton>
             )}
 
-            <p className="mt-4 text-center text-sm text-slate-400">🔒 Your resume data is encrypted and secure.</p>
+            <p className="mt-4 flex items-center justify-center gap-1.5 text-sm text-slate-400">
+              <Lock className="h-4 w-4 text-cyan-400" />
+              Your resume data is encrypted and secure.
+            </p>
             <p className="mt-2 text-center text-sm text-slate-400">Trusted by 1000+ students and job seekers</p>
 
             <p className="mt-6 text-center text-sm text-slate-400">

@@ -1,4 +1,4 @@
-﻿import fs from "fs";
+import fs from "fs";
 import path from "path";
 import pdf from "pdf-parse";
 import dotenv from "dotenv";
@@ -463,7 +463,7 @@ CRITICAL SCORING RULES:
    - If resume mentions 2+ meaningful projects with good descriptions, give 85-95%
    - If resume has 3+ projects with impact metrics, give 90-95%
 
-3. 🚀 AI/ML BONUS WEIGHTAGE (HIGHEST PRIORITY):
+3. AI/ML BONUS WEIGHTAGE (HIGHEST PRIORITY):
    - If resume mentions Machine Learning, Deep Learning, NLP, LLMs, Computer Vision, Transformer models, TensorFlow, PyTorch, etc., AUTOMATICALLY add +15-25 points to:
      * overallScore (bump to 85-95+ if technical is solid)
      * technicalSkillsScore (ensure 85-95+)

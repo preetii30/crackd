@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, animate, motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
-import { Github, Linkedin, Play, X } from 'lucide-react'
+import { Github, Linkedin, Play, X, CheckCircle2 } from 'lucide-react'
 import SectionHeading from '../components/SectionHeading'
 import demoVideo from '../../demo.mp4'
 
@@ -246,9 +246,9 @@ function LandingPage() {
               transition={{ duration: 0.8, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
               className="mt-10 flex flex-wrap gap-6 text-sm text-slate-400"
             >
-              <span>✓ ATS optimization</span>
-              <span>✓ Real AI analysis</span>
-              <span>✓ Actionable upgrades</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-cyan-400" /> ATS optimization</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-cyan-400" /> Real AI analysis</span>
+              <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-cyan-400" /> Actionable upgrades</span>
             </motion.div>
           </div>
 

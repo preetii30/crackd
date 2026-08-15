@@ -1,4 +1,6 @@
 {
+  "name": "crackd-backend",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",

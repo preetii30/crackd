@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { 
+  HelpCircle, 
+  CheckCircle, 
+  Code, 
+  FolderGit2, 
+  Layers, 
+  Users, 
+  ChevronDown, 
+  Lightbulb, 
+  Loader2, 
+  FileText 
+} from 'lucide-react'
 import { getAuthToken } from '../services/authService'
 import { getResumeHistory, getResumeReport, generateInterviewQuestions } from '../services/resumeService'
 
@@ -12,15 +24,6 @@ function InterviewQuestionsPage() {
   const [expandedQuestion, setExpandedQuestion] = useState(null)
   const navigate = useNavigate()
   const intervalRef = useRef(null)
-
-  useEffect(() => {
-    const authToken = getAuthToken()
-    if (!authToken) {
-      navigate('/login')
-      return
-    }
-    loadHistory()
-  }, [navigate])
 
   const loadHistory = async () => {
     try {
@@ -38,6 +41,15 @@ function InterviewQuestionsPage() {
     }
   }
 
+  useEffect(() => {
+    const authToken = getAuthToken()
+    if (!authToken) {
+      navigate('/login')
+      return
+    }
+    loadHistory()
+  }, [navigate])
+
   const pollQuestions = (reportId) => {
     if (intervalRef.current) clearInterval(intervalRef.current)
 
@@ -49,11 +61,11 @@ function InterviewQuestionsPage() {
           setSelectedReport(report)
           setHistory((current) => current.map((item) => (item._id === report._id ? report : item)))
           
-          // Stop polling when interviewQuestions data exists
           if (report.interviewQuestions && Object.keys(report.interviewQuestions).length > 0) {
             clearInterval(intervalRef.current)
             intervalRef.current = null
             setGenerating(false)
+            toast.success('Interview questions generated successfully!')
           }
         }
       } catch (err) {
@@ -78,6 +90,7 @@ function InterviewQuestionsPage() {
       setSelectedReport(response?.data?.report)
     } catch (error) {
       console.error('Error loading report:', error)
+      toast.error('Failed to load report details')
     }
   }
 
@@ -96,7 +109,6 @@ function InterviewQuestionsPage() {
       setGenerating(true)
       await generateInterviewQuestions(selectedReport._id)
       toast.success('Interview questions generation started!')
-      // Start polling for questions
       pollQuestions(selectedReport._id)
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Failed to generate questions')
@@ -105,7 +117,6 @@ function InterviewQuestionsPage() {
   }
 
   const questions = selectedReport?.interviewQuestions || {}
-  const isGenerating = generating
 
   return (
     <div className="space-y-6">
@@ -117,7 +128,10 @@ function InterviewQuestionsPage() {
 
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-          <h2 className="text-xl font-semibold text-white">Your Reports</h2>
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-cyan-400" />
+            <h2 className="text-xl font-semibold text-white">Your Reports</h2>
+          </div>
           <div className="mt-4 space-y-2">
             {history.length === 0 ? (
               <p className="text-sm text-slate-400">No reports yet.</p>
@@ -133,7 +147,14 @@ function InterviewQuestionsPage() {
                   }`}
                 >
                   <p className="font-medium text-white text-sm truncate">{item.originalName}</p>
-                  <p className="text-xs text-slate-400 mt-1">{item.status === 'analyzed' ? '✓ Analyzed' : 'Analyzing...'}</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    {item.status === 'analyzed' ? (
+                      <CheckCircle className="h-3 w-3 text-emerald-400" />
+                    ) : (
+                      <Loader2 className="h-3 w-3 text-cyan-400 animate-spin" />
+                    )}
+                    <span className="text-xs text-slate-400">{item.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}</span>
+                  </div>
                 </button>
               ))
             )}
@@ -145,23 +166,25 @@ function InterviewQuestionsPage() {
           >
             {generating ? (
               <>
-                <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.3"/>
-                  <path stroke="currentColor" strokeWidth="2" d="M4 12a8 8 0 018-8" strokeLinecap="round"/>
-                </svg>
+                <Loader2 className="w-4 h-4 animate-spin" />
                 Generating...
               </>
-            ) : 'Generate Questions'}
+            ) : (
+              <>
+                <HelpCircle className="w-4 h-4" />
+                Generate Questions
+              </>
+            )}
           </button>
         </div>
 
-        {isGenerating ? (
+        {generating ? (
           <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6 flex items-center justify-center h-96">
             <div className="text-center">
               <div className="inline-block">
-                <div className="animate-spin h-12 w-12 border-4 border-cyan-400 border-t-transparent rounded-full"></div>
+                <Loader2 className="animate-spin h-12 w-12 text-cyan-400" />
               </div>
-              <p className="mt-6 text-slate-300 font-medium">❓ Generating Interview Questions...</p>
+              <p className="mt-6 text-slate-300 font-medium">Generating Interview Questions...</p>
               <p className="mt-2 text-sm text-slate-400">Our AI is creating personalized interview questions based on your resume and technical skills.</p>
               <p className="mt-2 text-xs text-slate-500">This may take 30-60 seconds. Please do not refresh.</p>
             </div>
@@ -171,7 +194,10 @@ function InterviewQuestionsPage() {
             {questions.technicalQuestions && questions.technicalQuestions.length > 0 && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">⚙️ Technical Questions</h3>
+                  <div className="flex items-center gap-2">
+                    <Code className="h-5 w-5 text-cyan-400" />
+                    <h3 className="text-lg font-semibold text-white">Technical Questions</h3>
+                  </div>
                   {selectedReport?.interviewQuestions?.generatedAt && (
                     <span className="text-xs text-slate-400">
                       Generated: {new Date(selectedReport.interviewQuestions.generatedAt).toLocaleString()}
@@ -189,14 +215,14 @@ function InterviewQuestionsPage() {
                         <div className="flex-1">
                           <p className="font-medium text-white text-sm">{q.question}</p>
                           <p className="text-xs text-slate-400 mt-2">
-                            {q.topic} • <span className={`${
+                            {q.topic} - <span className={`${
                               q.difficulty === 'advanced' ? 'text-red-400' :
                               q.difficulty === 'intermediate' ? 'text-yellow-400' :
                               'text-green-400'
                             }`}>{q.difficulty}</span>
                           </p>
                         </div>
-                        <span className="text-slate-400">▼</span>
+                        <ChevronDown className={`h-4 w-4 text-slate-400 transition-transform ${expandedQuestion === `tech-${idx}` ? 'rotate-180' : ''}`} />
                       </div>
                     </button>
                   ))}
@@ -206,15 +232,19 @@ function InterviewQuestionsPage() {
 
             {questions.projectQuestions && questions.projectQuestions.length > 0 && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-                <h3 className="text-lg font-semibold text-white">📁 Project-based Questions</h3>
+                <div className="flex items-center gap-2">
+                  <FolderGit2 className="h-5 w-5 text-cyan-400" />
+                  <h3 className="text-lg font-semibold text-white">Project-based Questions</h3>
+                </div>
                 <div className="mt-4 space-y-2">
                   {questions.projectQuestions.slice(0, 5).map((q, idx) => (
                     <div key={idx} className="rounded-xl border border-slate-700 bg-slate-950/50 p-4">
                       <p className="font-medium text-white text-sm">{q.question}</p>
                       {q.expectedAnswer && (
-                        <p className="text-xs text-slate-300 mt-3 p-2 bg-slate-900/50 rounded-lg">
-                          💡 Expected: {q.expectedAnswer}
-                        </p>
+                        <div className="flex items-start gap-2 text-xs text-slate-300 mt-3 p-2 bg-slate-900/50 rounded-lg">
+                          <Lightbulb className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                          <span>Expected: {q.expectedAnswer}</span>
+                        </div>
                       )}
                     </div>
                   ))}
@@ -224,7 +254,10 @@ function InterviewQuestionsPage() {
 
             {questions.systemDesignQuestions && questions.systemDesignQuestions.length > 0 && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-                <h3 className="text-lg font-semibold text-white">🏗️ System Design Questions</h3>
+                <div className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-cyan-400" />
+                  <h3 className="text-lg font-semibold text-white">System Design Questions</h3>
+                </div>
                 <div className="mt-4 space-y-2">
                   {questions.systemDesignQuestions.slice(0, 5).map((q, idx) => (
                     <div key={idx} className="rounded-xl border border-slate-700 bg-slate-950/50 p-4">
@@ -244,7 +277,10 @@ function InterviewQuestionsPage() {
 
             {questions.behavioralQuestions && questions.behavioralQuestions.length > 0 && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-                <h3 className="text-lg font-semibold text-white">🤝 Behavioral Questions</h3>
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-cyan-400" />
+                  <h3 className="text-lg font-semibold text-white">Behavioral Questions</h3>
+                </div>
                 <div className="mt-4 space-y-2">
                   {questions.behavioralQuestions.slice(0, 5).map((q, idx) => (
                     <div key={idx} className="rounded-xl border border-slate-700 bg-slate-950/50 p-4">

@@ -170,7 +170,7 @@ function LoginPage() {
           </button>
 
           <p className="mt-4 text-center text-sm text-slate-400">
-            🚀 crackd • Mock Interviews • ATS Score
+            crackd • Mock Interviews • ATS Score
           </p>
           <p className="text-center text-xs uppercase tracking-[0.2em] text-slate-500">
             Trusted by 1000+ job seekers

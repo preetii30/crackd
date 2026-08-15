@@ -1,27 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { Sparkles, CheckCircle, ListOrdered, Target, Zap, TrendingUp, ArrowRight, Loader2, FileText } from 'lucide-react'
 import { getAuthToken } from '../services/authService'
 import { getResumeHistory, getResumeReport, generateAISuggestions } from '../services/resumeService'
 
 function AISuggestionsPage() {
-  const [token, setToken] = useState(null)
   const [history, setHistory] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const navigate = useNavigate()
   const intervalRef = useRef(null)
-
-  useEffect(() => {
-    const authToken = getAuthToken()
-    if (!authToken) {
-      navigate('/login')
-      return
-    }
-    setToken(authToken)
-    loadHistory()
-  }, [navigate])
 
   const loadHistory = async () => {
     try {
@@ -39,6 +29,15 @@ function AISuggestionsPage() {
     }
   }
 
+  useEffect(() => {
+    const authToken = getAuthToken()
+    if (!authToken) {
+      navigate('/login')
+      return
+    }
+    loadHistory()
+  }, [navigate])
+
   const pollSuggestions = (reportId) => {
     if (intervalRef.current) clearInterval(intervalRef.current)
 
@@ -50,11 +49,11 @@ function AISuggestionsPage() {
           setSelectedReport(report)
           setHistory((current) => current.map((item) => (item._id === report._id ? report : item)))
           
-          // Stop polling when aiSuggestions data exists
           if (report.aiSuggestions && Object.keys(report.aiSuggestions).length > 0) {
             clearInterval(intervalRef.current)
             intervalRef.current = null
             setGenerating(false)
+            toast.success('AI Suggestions generated successfully!')
           }
         }
       } catch (err) {
@@ -74,12 +73,12 @@ function AISuggestionsPage() {
 
   const handleSelectReport = async (report) => {
     setSelectedReport(report)
-    // Fetch latest data
     try {
       const response = await getResumeReport(report._id)
       setSelectedReport(response?.data?.report)
     } catch (error) {
       console.error('Error loading report details:', error)
+      toast.error('Failed to load report details')
     }
   }
 
@@ -98,7 +97,6 @@ function AISuggestionsPage() {
       setGenerating(true)
       await generateAISuggestions(selectedReport._id)
       toast.success('AI suggestions generation started!')
-      // Start polling for suggestions
       pollSuggestions(selectedReport._id)
     } catch (error) {
       toast.error(error?.response?.data?.message || 'Failed to generate suggestions')
@@ -107,7 +105,6 @@ function AISuggestionsPage() {
   }
 
   const suggestions = selectedReport?.aiSuggestions || {}
-  const isGenerating = generating
 
   return (
     <div className="space-y-6">
@@ -119,7 +116,10 @@ function AISuggestionsPage() {
 
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
         <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-          <h2 className="text-xl font-semibold text-white">Your Reports</h2>
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-cyan-400" />
+            <h2 className="text-xl font-semibold text-white">Your Reports</h2>
+          </div>
           <div className="mt-4 space-y-2">
             {history.length === 0 ? (
               <p className="text-sm text-slate-400">No reports yet.</p>
@@ -135,7 +135,14 @@ function AISuggestionsPage() {
                   }`}
                 >
                   <p className="font-medium text-white text-sm truncate">{item.originalName}</p>
-                  <p className="text-xs text-slate-400 mt-1">{item.status === 'analyzed' ? '✓ Analyzed' : 'Analyzing...'}</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    {item.status === 'analyzed' ? (
+                      <CheckCircle className="h-3 w-3 text-emerald-400" />
+                    ) : (
+                      <Loader2 className="h-3 w-3 text-cyan-400 animate-spin" />
+                    )}
+                    <span className="text-xs text-slate-400">{item.status === 'analyzed' ? 'Analyzed' : 'Analyzing...'}</span>
+                  </div>
                 </button>
               ))
             )}
@@ -147,23 +154,25 @@ function AISuggestionsPage() {
           >
             {generating ? (
               <>
-                <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.3"/>
-                  <path stroke="currentColor" strokeWidth="2" d="M4 12a8 8 0 018-8" strokeLinecap="round"/>
-                </svg>
+                <Loader2 className="w-4 h-4 animate-spin" />
                 Generating...
               </>
-            ) : 'Generate Suggestions'}
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Generate Suggestions
+              </>
+            )}
           </button>
         </div>
 
-        {isGenerating ? (
+        {generating ? (
           <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6 flex items-center justify-center h-96">
             <div className="text-center">
               <div className="inline-block">
-                <div className="animate-spin h-12 w-12 border-4 border-cyan-400 border-t-transparent rounded-full"></div>
+                <Loader2 className="animate-spin h-12 w-12 text-cyan-400" />
               </div>
-              <p className="mt-6 text-slate-300 font-medium">✨ Generating AI Suggestions...</p>
+              <p className="mt-6 text-slate-300 font-medium">Generating AI Suggestions...</p>
               <p className="mt-2 text-sm text-slate-400">Our AI is analyzing your resume and creating personalized recommendations.</p>
               <p className="mt-2 text-xs text-slate-500">This may take 30-60 seconds. Please do not refresh.</p>
             </div>
@@ -173,7 +182,10 @@ function AISuggestionsPage() {
             {suggestions.sections && suggestions.sections.length > 0 && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-white">📝 Improvement Areas</h3>
+                  <div className="flex items-center gap-2">
+                    <ListOrdered className="h-5 w-5 text-cyan-400" />
+                    <h3 className="text-lg font-semibold text-white">Improvement Areas</h3>
+                  </div>
                   {selectedReport?.aiSuggestions?.generatedAt && (
                     <span className="text-xs text-slate-400">
                       Generated: {new Date(selectedReport.aiSuggestions.generatedAt).toLocaleString()}
@@ -195,8 +207,9 @@ function AISuggestionsPage() {
                       </div>
                       <ul className="mt-3 space-y-2">
                         {section.suggestions.map((sug, sidx) => (
-                          <li key={sidx} className="text-sm text-slate-300 flex gap-2">
-                            <span className="text-cyan-300">→</span> {sug}
+                          <li key={sidx} className="text-sm text-slate-300 flex items-start gap-2">
+                            <ArrowRight className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                            <span>{sug}</span>
                           </li>
                         ))}
                       </ul>
@@ -208,11 +221,15 @@ function AISuggestionsPage() {
 
             {suggestions.quickWins && suggestions.quickWins.length > 0 && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-                <h3 className="text-lg font-semibold text-white">⚡ Quick Wins</h3>
+                <div className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-amber-400" />
+                  <h3 className="text-lg font-semibold text-white">Quick Wins</h3>
+                </div>
                 <ul className="mt-4 space-y-2">
                   {suggestions.quickWins.map((win, idx) => (
-                    <li key={idx} className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-300">
-                      ✓ {win}
+                    <li key={idx} className="flex items-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-sm text-emerald-300">
+                      <CheckCircle className="h-4 w-4 shrink-0 text-emerald-400" />
+                      <span>{win}</span>
                     </li>
                   ))}
                 </ul>
@@ -221,14 +238,20 @@ function AISuggestionsPage() {
 
             {suggestions.longTermStrategy && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-                <h3 className="text-lg font-semibold text-white">🎯 Long-term Strategy</h3>
+                <div className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-cyan-400" />
+                  <h3 className="text-lg font-semibold text-white">Long-term Strategy</h3>
+                </div>
                 <p className="mt-3 text-slate-300 text-sm leading-relaxed">{suggestions.longTermStrategy}</p>
               </div>
             )}
 
             {suggestions.estimatedImpact && (
               <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-                <h3 className="text-lg font-semibold text-white">📊 Estimated Impact</h3>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-cyan-400" />
+                  <h3 className="text-lg font-semibold text-white">Estimated Impact</h3>
+                </div>
                 <p className="mt-3 text-slate-300 text-sm">{suggestions.estimatedImpact}</p>
               </div>
             )}

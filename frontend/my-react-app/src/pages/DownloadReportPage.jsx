@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import { FileText, Download, CheckCircle, Package, Loader2 } from 'lucide-react'
 import { getAuthToken } from '../services/authService'
 import { getResumeHistory, downloadResumeReport } from '../services/resumeService'
 
@@ -24,6 +26,7 @@ function DownloadReportPage() {
       setHistory(reports)
     } catch (_error) {
       console.error('Unable to load reports')
+      toast.error('Unable to load reports list')
     }
   }
 
@@ -40,9 +43,10 @@ function DownloadReportPage() {
       link.click()
       link.remove()
       URL.revokeObjectURL(url)
+      toast.success('Report downloaded successfully!')
     } catch (error) {
       console.error('Download failed:', error)
-      alert(error?.response?.data?.message || 'Unable to download the report.')
+      toast.error(error?.response?.data?.message || 'Unable to download the report.')
     } finally {
       setDownloading((prev) => ({ ...prev, [reportId]: false }))
     }
@@ -57,7 +61,10 @@ function DownloadReportPage() {
       </div>
 
       <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-        <h2 className="text-xl font-semibold text-white">📋 Available Reports</h2>
+        <div className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-cyan-400" />
+          <h2 className="text-xl font-semibold text-white">Available Reports</h2>
+        </div>
         
         <div className="mt-6 space-y-3">
           {history.length === 0 ? (
@@ -87,13 +94,23 @@ function DownloadReportPage() {
                 <button
                   onClick={() => handleDownloadPDF(item._id, item.originalName)}
                   disabled={item.status !== 'analyzed' || downloading[item._id]}
-                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition ${
                     item.status === 'analyzed' && !downloading[item._id]
                       ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300'
                       : 'bg-slate-700 text-slate-400 cursor-not-allowed'
                   }`}
                 >
-                  {downloading[item._id] ? '⬇️ Downloading...' : '⬇️ Download PDF'}
+                  {downloading[item._id] ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Download PDF
+                    </>
+                  )}
                 </button>
               </div>
             ))
@@ -102,28 +119,23 @@ function DownloadReportPage() {
       </div>
 
       <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-        <h2 className="text-xl font-semibold text-white">📦 What's Included</h2>
+        <div className="flex items-center gap-2">
+          <Package className="h-5 w-5 text-cyan-400" />
+          <h2 className="text-xl font-semibold text-white">What's Included</h2>
+        </div>
         <ul className="mt-4 space-y-3 text-slate-300">
-          <li className="flex items-start gap-3">
-            <span className="text-cyan-300 mt-1">✓</span>
-            <span>Complete analysis metrics and scores</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-cyan-300 mt-1">✓</span>
-            <span>Strengths and weaknesses breakdown</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-cyan-300 mt-1">✓</span>
-            <span>Actionable improvement suggestions</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-cyan-300 mt-1">✓</span>
-            <span>Recommended skills and certifications</span>
-          </li>
-          <li className="flex items-start gap-3">
-            <span className="text-cyan-300 mt-1">✓</span>
-            <span>Professional formatting for sharing</span>
-          </li>
+          {[
+            'Complete analysis metrics and scores',
+            'Strengths and weaknesses breakdown',
+            'Actionable improvement suggestions',
+            'Recommended skills and certifications',
+            'Professional formatting for sharing'
+          ].map((feature, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <CheckCircle className="h-4 w-4 text-cyan-400 shrink-0 mt-1" />
+              <span>{feature}</span>
+            </li>
+          ))}
         </ul>
       </div>
     </div>

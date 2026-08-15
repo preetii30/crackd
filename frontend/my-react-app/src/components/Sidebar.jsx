@@ -1,5 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { 
+  Home, 
+  FileText, 
+  Sparkles, 
+  HelpCircle, 
+  Mail, 
+  BarChart3, 
+  Download, 
+  Settings,
+  ChevronDown,
+  Menu,
+  LogOut,
+  User
+} from 'lucide-react'
 import { getCurrentUser, logout } from '../services/authService'
 
 function Sidebar() {
@@ -10,14 +24,14 @@ function Sidebar() {
   const navigate = useNavigate()
 
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: '🏠' },
-    { id: 'resume-analysis', label: 'Resume Analysis', path: '/resume-analysis', icon: '📋' },
-    { id: 'ai-suggestions', label: 'AI Suggestions', path: '/ai-suggestions', icon: '✨' },
-    { id: 'interview', label: 'Interview Questions', path: '/interview-questions', icon: '❓' },
-    { id: 'cover-letter', label: 'Cover Letter', path: '/cover-letter', icon: '📝' },
-    { id: 'analytics', label: 'Analytics', path: '/analytics', icon: '📊' },
-    { id: 'download', label: 'Download Report', path: '/download-report', icon: '⬇️' },
-    { id: 'settings', label: 'Settings', path: '/settings', icon: '⚙️' },
+    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: Home },
+    { id: 'resume-analysis', label: 'Resume Analysis', path: '/resume-analysis', icon: FileText },
+    { id: 'ai-suggestions', label: 'AI Suggestions', path: '/ai-suggestions', icon: Sparkles },
+    { id: 'interview', label: 'Interview Questions', path: '/interview-questions', icon: HelpCircle },
+    { id: 'cover-letter', label: 'Cover Letter', path: '/cover-letter', icon: Mail },
+    { id: 'analytics', label: 'Analytics', path: '/analytics', icon: BarChart3 },
+    { id: 'download', label: 'Download Report', path: '/download-report', icon: Download },
+    { id: 'settings', label: 'Settings', path: '/settings', icon: Settings },
   ]
 
   useEffect(() => {
@@ -52,10 +66,9 @@ function Sidebar() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed top-4 left-4 z-50 rounded-lg bg-slate-900 p-2 md:hidden"
+        aria-label="Toggle navigation menu"
       >
-        <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
+        <Menu className="h-6 w-6 text-white" />
       </button>
 
       {/* Sidebar */}
@@ -68,15 +81,12 @@ function Sidebar() {
           <div className="mb-8">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center">
-                <span className="text-lg font-bold">cr</span>
+                <span className="text-lg font-bold text-slate-950">cr</span>
               </div>
               <div>
-                {/* 'crackd' ko bada kiya aur semi-bold look diya */}
                 <p className="text-xl font-bold text-white tracking-wide">
                   crackd
                 </p>
-
-                {/* 'ai resume analyst' ko chota kiya, letters me gap badhaya aur text thoda subtle kiya */}
                 <p className="text-[10px] uppercase tracking-[0.25em] font-medium text-slate-400 mt-0.5">
                   ai resume analyst
                 </p>
@@ -86,22 +96,25 @@ function Sidebar() {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-2">
-            {menuItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  navigate(item.path)
-                  setIsOpen(false)
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive(item.path)
-                    ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/30'
-                    : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
-                  }`}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
-              </button>
-            ))}
+            {menuItems.map((item) => {
+              const IconComponent = item.icon
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    navigate(item.path)
+                    setIsOpen(false)
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${isActive(item.path)
+                      ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/30'
+                      : 'text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'
+                    }`}
+                >
+                  <IconComponent className="h-5 w-5 shrink-0" />
+                  <span className="font-medium">{item.label}</span>
+                </button>
+              )
+            })}
           </nav>
 
           <div className="mt-auto">
@@ -123,11 +136,11 @@ function Sidebar() {
                   </div>
                 )}
               </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-white">{user?.fullName || 'User Name'}</p>
-                <p className="text-xs text-slate-400">Keep Coding 🚀</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">{user?.fullName || 'User Name'}</p>
+                <p className="text-xs text-slate-400">Keep Coding</p>
               </div>
-              <span className={`text-white transition ${openProfile ? 'rotate-180' : ''}`}>&#9662;</span>
+              <ChevronDown className={`h-4 w-4 text-white transition-transform ${openProfile ? 'rotate-180' : ''}`} />
             </button>
 
             {openProfile ? (
@@ -135,18 +148,20 @@ function Sidebar() {
                 <button
                   type="button"
                   onClick={() => {
-                    navigate('/settings')
+                    navigate('/profile')
                     setOpenProfile(false)
                   }}
-                  className="w-full rounded-2xl px-3 py-2 text-left text-slate-100 hover:bg-slate-900/50"
+                  className="w-full flex items-center gap-2 rounded-2xl px-3 py-2 text-left text-slate-100 hover:bg-slate-900/50"
                 >
+                  <User className="h-4 w-4 text-slate-400" />
                   View Profile
                 </button>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full rounded-2xl px-3 py-2 text-left text-rose-300 hover:bg-rose-500/10"
+                  className="w-full flex items-center gap-2 rounded-2xl px-3 py-2 text-left text-rose-300 hover:bg-rose-500/10"
                 >
+                  <LogOut className="h-4 w-4 text-rose-400" />
                   Logout
                 </button>
               </div>

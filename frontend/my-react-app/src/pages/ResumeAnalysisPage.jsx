@@ -1,30 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import { 
+  Trash2, 
+  AlertTriangle, 
+  CheckCircle, 
+  Search, 
+  Loader2, 
+  Sparkles, 
+  Award, 
+  Lightbulb, 
+  TrendingUp,
+  FileText
+} from 'lucide-react'
 import { getAuthToken } from '../services/authService'
 import { getResumeReport, getResumeHistory, deleteResumeReport } from '../services/resumeService'
 import MetricCard from '../components/MetricCard'
 import ProgressBar from '../components/ProgressBar'
 
 function ResumeAnalysisPage() {
-  const [token, setToken] = useState(null)
   const [history, setHistory] = useState([])
   const [selectedReport, setSelectedReport] = useState(null)
-  const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState('desc')
   const navigate = useNavigate()
   const intervalRef = useRef(null)
-
-  useEffect(() => {
-    const authToken = getAuthToken()
-    if (!authToken) {
-      navigate('/login')
-      return
-    }
-    setToken(authToken)
-    loadHistory()
-  }, [navigate, search, sort])
 
   const loadHistory = async () => {
     try {
@@ -41,9 +41,18 @@ function ResumeAnalysisPage() {
         }
       }
     } catch (_error) {
-      setError('Unable to load analysis history.')
+      toast.error('Unable to load analysis history.')
     }
   }
+
+  useEffect(() => {
+    const authToken = getAuthToken()
+    if (!authToken) {
+      navigate('/login')
+      return
+    }
+    loadHistory()
+  }, [navigate, search, sort])
 
   const pollReport = (reportId) => {
     if (intervalRef.current) clearInterval(intervalRef.current)
@@ -59,6 +68,9 @@ function ResumeAnalysisPage() {
           if (report.status === 'analyzed' || report.status === 'failed') {
             clearInterval(intervalRef.current)
             intervalRef.current = null
+            if (report.status === 'analyzed') {
+              toast.success('Resume analysis complete!')
+            }
           }
         }
       } catch (err) {
@@ -108,12 +120,15 @@ function ResumeAnalysisPage() {
               <h2 className="mt-2 text-xl font-semibold text-white">Your Reports</h2>
             </div>
             <div className="flex items-center gap-3">
-              <input 
-                value={search} 
-                onChange={(event) => setSearch(event.target.value)} 
-                placeholder="Search reports..." 
-                className="rounded-full border border-white/10 bg-slate-950/50 px-3 py-2 text-sm text-slate-300 outline-none focus:border-cyan-400/30" 
-              />
+              <div className="relative">
+                <Search className="h-4 w-4 absolute left-3 top-3 text-slate-400" />
+                <input 
+                  value={search} 
+                  onChange={(event) => setSearch(event.target.value)} 
+                  placeholder="Search reports..." 
+                  className="rounded-full border border-white/10 bg-slate-950/50 pl-9 pr-3 py-2 text-sm text-slate-300 outline-none focus:border-cyan-400/30" 
+                />
+              </div>
               <select 
                 value={sort} 
                 onChange={(event) => setSort(event.target.value)} 
@@ -145,7 +160,14 @@ function ResumeAnalysisPage() {
                   }`}
                 >
                   <p className="font-medium text-white">{item.originalName}</p>
-                  <p className="mt-1 text-xs text-slate-400">{new Date(item.uploadedAt).toLocaleDateString()}</p>
+                  <div className="flex items-center gap-1 mt-1">
+                    {item.status === 'analyzed' ? (
+                      <CheckCircle className="h-3 w-3 text-emerald-400" />
+                    ) : (
+                      <Loader2 className="h-3 w-3 text-cyan-400 animate-spin" />
+                    )}
+                    <span className="text-xs text-slate-400">{new Date(item.uploadedAt).toLocaleDateString()}</span>
+                  </div>
                 </button>
               ))
             )}
@@ -173,9 +195,10 @@ function ResumeAnalysisPage() {
               )}
               <button
                 onClick={() => handleDeleteReport(selectedReport._id)}
-                className="mt-4 w-full rounded-xl bg-red-600/20 text-red-300 px-4 py-2 font-medium hover:bg-red-600/30 transition border border-red-500/30"
+                className="mt-4 w-full flex items-center justify-center gap-2 rounded-xl bg-red-600/20 text-red-300 px-4 py-2 font-medium hover:bg-red-600/30 transition border border-red-500/30"
               >
-                🗑️ Delete Resume
+                <Trash2 className="h-4 w-4" />
+                Delete Resume
               </button>
             </>
           ) : (
@@ -208,16 +231,22 @@ function ResumeAnalysisPage() {
               <div>
                 <h3 className="text-lg font-semibold text-white">Strengths</h3>
                 <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                  {(activeAnalysis.strengths || []).map((item) => (
-                    <li key={item} className="rounded-xl bg-slate-900/70 px-3 py-2">• {item}</li>
+                  {(activeAnalysis.strengths || []).map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 rounded-xl bg-slate-900/70 px-3 py-2">
+                      <span className="text-emerald-400 mt-0.5">•</span>
+                      <span>{item}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white">Weaknesses</h3>
                 <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                  {(activeAnalysis.weaknesses || []).map((item) => (
-                    <li key={item} className="rounded-xl bg-slate-900/70 px-3 py-2">• {item}</li>
+                  {(activeAnalysis.weaknesses || []).map((item, idx) => (
+                    <li key={idx} className="flex items-start gap-2 rounded-xl bg-slate-900/70 px-3 py-2">
+                      <span className="text-rose-400 mt-0.5">•</span>
+                      <span>{item}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -246,58 +275,81 @@ function ResumeAnalysisPage() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-              <h3 className="text-lg font-semibold text-white">Recommended certifications</h3>
+              <div className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-cyan-400" />
+                <h3 className="text-lg font-semibold text-white">Recommended certifications</h3>
+              </div>
               <ul className="mt-4 space-y-2 text-sm text-slate-400">
-                {(activeAnalysis.suggestedCertifications || []).map((item) => (
-                  <li key={item} className="rounded-xl bg-slate-900/70 px-3 py-2">• {item}</li>
+                {(activeAnalysis.suggestedCertifications || []).map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2 rounded-xl bg-slate-900/70 px-3 py-2">
+                    <span className="text-cyan-400 mt-0.5">•</span>
+                    <span>{item}</span>
+                  </li>
                 ))}
               </ul>
             </div>
 
             <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-              <h3 className="text-lg font-semibold text-white">Project ideas</h3>
+              <div className="flex items-center gap-2">
+                <Lightbulb className="h-5 w-5 text-amber-400" />
+                <h3 className="text-lg font-semibold text-white">Project ideas</h3>
+              </div>
               <ul className="mt-4 space-y-2 text-sm text-slate-400">
-                {(activeAnalysis.suggestedProjects || []).map((item) => (
-                  <li key={item} className="rounded-xl bg-slate-900/70 px-3 py-2">• {item}</li>
+                {(activeAnalysis.suggestedProjects || []).map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2 rounded-xl bg-slate-900/70 px-3 py-2">
+                    <span className="text-cyan-400 mt-0.5">•</span>
+                    <span>{item}</span>
+                  </li>
                 ))}
               </ul>
             </div>
           </div>
 
           <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-            <h3 className="text-lg font-semibold text-white">Improvements</h3>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-cyan-400" />
+              <h3 className="text-lg font-semibold text-white">Improvements</h3>
+            </div>
             <div className="mt-4 space-y-3">
               {(activeAnalysis.suggestedImprovements || []).map((item, idx) => (
-                <div key={idx} className="rounded-xl border border-white/5 bg-slate-950/50 px-4 py-3 text-slate-300">
-                  <p>• {item}</p>
+                <div key={idx} className="flex items-start gap-2 rounded-xl border border-white/5 bg-slate-950/50 px-4 py-3 text-slate-300">
+                  <span className="text-cyan-400 mt-0.5">•</span>
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-            <h3 className="text-lg font-semibold text-white">Top Priority Improvements</h3>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-rose-400" />
+              <h3 className="text-lg font-semibold text-white">Top Priority Improvements</h3>
+            </div>
             <div className="mt-4 space-y-3">
               {(activeAnalysis.topPriorityImprovements || []).map((item, idx) => (
-                <div key={idx} className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-300">
-                  <p>⚠️ {item}</p>
+                <div key={idx} className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-red-300">
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5 text-red-400" />
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
           </div>
 
           <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
-            <h3 className="text-lg font-semibold text-white">Final Summary</h3>
-            <p className="mt-4 text-slate-400">{activeAnalysis.finalSummary}</p>
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-cyan-400" />
+              <h3 className="text-lg font-semibold text-white">Final Summary</h3>
+            </div>
+            <p className="mt-4 text-slate-400 leading-relaxed">{activeAnalysis.finalSummary}</p>
           </div>
         </div>
       ) : selectedReport && (selectedReport.status === 'analyzing' || selectedReport.status === 'uploaded') ? (
         <div className="rounded-[2rem] border border-white/10 bg-slate-900/50 backdrop-blur-sm p-6">
           <div className="text-center py-12">
             <div className="inline-block">
-              <div className="animate-spin h-8 w-8 border-4 border-cyan-400 border-t-transparent rounded-full"></div>
+              <Loader2 className="animate-spin h-8 w-8 text-cyan-400" />
             </div>
-            <p className="mt-4 text-slate-300">🔄 Gemini AI is analyzing your resume...</p>
+            <p className="mt-4 text-slate-300 font-medium">AI is analyzing your resume...</p>
             <p className="mt-2 text-sm text-slate-400">This usually takes a few seconds.</p>
           </div>
         </div>
